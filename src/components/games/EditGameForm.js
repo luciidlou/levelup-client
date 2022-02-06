@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from "react"
-import { useHistory } from 'react-router-dom'
-import { GameManager } from "../../apimanager/GameManager.js"
-import { GameTypeManager } from "../../apimanager/GameTypeManager.js"
+import { useEffect, useState } from "react"
+import { useHistory, useParams } from "react-router-dom"
+import { GameManager } from "../../apimanager/GameManager"
+import { GameTypeManager } from "../../apimanager/GameTypeManager"
 import "./GameForm.css"
-
-export const GameForm = (props) => {
+export const EditGameForm = (props) => {
     const history = useHistory()
     const [gameTypes, setGameTypes] = useState([])
     const currentUserId = localStorage.getItem('userId')
+    const { gameId } = useParams()
     /*
         Since the input fields are bound to the values of
         the properties of this state variable, you need to
         provide some default values.
     */
-    const [currentGame, setCurrentGame] = useState({
+    const [editedGame, setEditedGame] = useState({
         skillLevel: 1,
         numberOfPlayers: 0,
         title: "",
@@ -22,44 +22,57 @@ export const GameForm = (props) => {
     })
 
     useEffect(() => {
+        GameManager.getSingleGame(gameId).then((game) => setEditedGame({
+            skillLevel: game.skill_level,
+            numberOfPlayers: game.number_of_players,
+            title: game.title,
+            maker: game.maker,
+            gameTypeId: game.game_type?.id
+        }))
+    }, [])
+
+
+
+    useEffect(() => {
         GameTypeManager.getGameTypes().then(setGameTypes)
     }, [])
 
+
     const changeGameState = (event) => {
-        const copy = { ...currentGame }
+        const copy = { ...editedGame }
         const key = event.target.name
         const value = event.target.value
         copy[key] = value
-        setCurrentGame(copy)
+        setEditedGame(copy)
     }
 
-    const handleSubmitGame = (evt) => {
+    const handleEditGame = (evt) => {
         // Prevent form from being submitted
         evt.preventDefault()
 
         const game = {
-            maker: currentGame.maker,
-            title: currentGame.title,
-            number_of_players: parseInt(currentGame.numberOfPlayers),
-            skill_level: parseInt(currentGame.skillLevel),
-            game_type: parseInt(currentGame.gameTypeId),
+            maker: editedGame.maker,
+            title: editedGame.title,
+            number_of_players: parseInt(editedGame.numberOfPlayers),
+            skill_level: parseInt(editedGame.skillLevel),
+            game_type: parseInt(editedGame.gameTypeId),
             gamer: parseInt(currentUserId)
         }
 
         // Send POST request to your API
-        GameManager.createGame(game)
+        GameManager.updateGame(gameId, game)
             .then(props.syncGames)
             .then(() => history.push("/games"))
     }
 
     return (
         <form className="gameForm">
-            <h2 className="gameForm__title">Register New Game</h2>
+            <h2 className="gameForm__title">Edit {editedGame.title}</h2>
             <fieldset>
                 <div className="form-group">
                     <label htmlFor="title">Title: </label>
                     <input type="text" name="title" required autoFocus className="form-control"
-                        value={currentGame.title}
+                        value={editedGame.title}
                         onChange={changeGameState}
                     />
                 </div>
@@ -68,7 +81,7 @@ export const GameForm = (props) => {
                 <div className="form-group">
                     <label htmlFor="maker">Maker: </label>
                     <input type="text" name="maker" required className="form-control"
-                        value={currentGame.maker}
+                        value={editedGame.maker}
                         onChange={changeGameState}
                     />
                 </div>
@@ -77,7 +90,7 @@ export const GameForm = (props) => {
                 <div className="form-group">
                     <label htmlFor="numberOfPlayers">Number Of Players: </label>
                     <input min={1} max={100} type="number" name="numberOfPlayers" required className="form-control"
-                        value={currentGame.numberOfPlayers}
+                        value={editedGame.numberOfPlayers}
                         onChange={changeGameState}
                     />
                 </div>
@@ -86,16 +99,16 @@ export const GameForm = (props) => {
                 <div className="form-group">
                     <label htmlFor="skillLevel">Skill Level (1-10): </label>
                     <input min={1} max={10} type="number" name="skillLevel" required className="form-control"
-                        value={currentGame.skillLevel}
+                        value={editedGame.skillLevel}
                         onChange={changeGameState}
                     />
                 </div>
             </fieldset>
             <fieldset>
                 <div className="form-group">
-                    <label htmlFor="gameTypeId">Skill Level: </label>
+                    <label htmlFor="gameTypeId">What type of game? </label>
                     <select name="gameTypeId" required className="form-control"
-                        value={currentGame.gameTypeId}
+                        value={editedGame.gameTypeId}
                         onChange={changeGameState}>
                         <option value={0}>Choose a game type...</option>
                         {
@@ -109,10 +122,12 @@ export const GameForm = (props) => {
                 </div>
             </fieldset>
             <div className="btn-container">
-                <button type="submit"
-                    onClick={handleSubmitGame}
-                    className="btn btn-primary">Add game</button>
-                <button type="reset"
+                <button
+                    type="submit"
+                    onClick={handleEditGame}
+                    className="btn btn-primary">Confirm edit</button>
+                <button
+                    type="reset"
                     onClick={() => history.push('/games')}
                     className="btn btn-primary">Cancel</button>
             </div>
