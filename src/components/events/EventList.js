@@ -10,6 +10,15 @@ export const EventList = (props) => {
         EventManager.deleteEvent(id).then(props.syncEvents)
     }
 
+    const handleJoinEvent = (id) => {
+        EventManager.joinEvent(id)
+            .then(props.syncEvents)
+    }
+    const handleLeaveEvent = (id) => {
+        EventManager.leaveEvent(id)
+            .then(props.syncEvents)
+    }
+
     return (
         <>
             <h2>Events</h2>
@@ -29,6 +38,13 @@ export const EventList = (props) => {
                                 <div className="event__organizer">Organized by: {organizerName}</div>
                                 <div className="event__date">Date: {moment(`${event.date} ${event.time}`, 'YYYY-MM-DD HH:mm:s').format('LLL')}</div>
                                 <div className='btn-container'>
+                                    {
+                                        event.joined
+                                            ?
+                                            <button className='btn edit-btn' onClick={() => handleLeaveEvent(event.id)}>Leave event</button>
+                                            :
+                                            <button className='btn edit-btn' onClick={() => handleJoinEvent(event.id)}>Join event</button>
+                                    }
                                     <button className='btn edit-btn' onClick={() => history.push(`/events/${event.id}/edit`)}>Edit event</button>
                                     <button className='btn edit-btn' onClick={() => handleDeleteEvent(event.id)}>Delete event</button>
                                 </div>

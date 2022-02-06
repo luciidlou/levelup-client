@@ -49,5 +49,26 @@ export const EventManager = {
             }
         }
         return fetch(`http://localhost:8000/events/${id}`, fetchOptions)
+    },
+    async joinEvent(id) {
+        const fetchOptions = {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                "Authorization": `Token ${localStorage.getItem("lu_token")}`
+            }
+        }
+        const res = await fetch(`http://localhost:8000/events/${id}/signup`, fetchOptions)
+        return await res.json()
+    },
+    async leaveEvent(id) {
+        const fetchOptions = {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Token ${localStorage.getItem("lu_token")}`
+            }
+        }
+        const res = await fetch(`http://localhost:8000/events/${id}/leave`, fetchOptions)
+        return res
     }
 }
