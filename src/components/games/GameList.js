@@ -24,6 +24,7 @@ export const GameList = (props) => {
                             <div className="game__dev">{game.maker}</div>
                             <div className="game__players">{game.number_of_players === 1 ? `1 player needed` : `${game.number_of_players} players needed`}</div>
                             <div className="game__skillLevel">Skill level is {game.skill_level}</div>
+                            <div className="game__event-count">Event count: {game.event_count}</div>
                             <div className='btn-container'>
                                 <button className='btn edit-btn' onClick={() => history.push(`/games/${game.id}/edit`)}>Edit game</button>
                                 <button className='btn edit-btn' onClick={() => handleDeleteGame(game.id)}>Delete game</button>
